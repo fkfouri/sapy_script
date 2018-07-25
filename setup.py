@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sapy_script",
-    version="0.0.1",
-    author="fkfouri/mariotaddeucci",
+    version="0.0.4",
+    author="fkfouri, mariotaddeucci",
     author_email="kfouri.fabio@gmail.com",
     description="Library to manipulate SAP by script",
     long_description=long_description,
