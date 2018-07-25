@@ -1,5 +1,3 @@
-# Example Package
+# sapy_script
 
-This is a simple example package. You can use
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+This is a library that run native SAP script language, that allow some automations using python codes.
