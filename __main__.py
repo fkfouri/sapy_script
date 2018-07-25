@@ -1,0 +1,1 @@
+#para iniciar se chamado pelo terminal python -m
