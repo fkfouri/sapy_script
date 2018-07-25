@@ -53,7 +53,13 @@ class SAP:
 
         return GetObject("SAPGUI").GetScriptingEngine
 
-    def connect(self, environment, client=None, user=None, password=None, lang=None):
+    def get_sbar_status(self, session):
+        return session.findById("wnd[0]/sbar/pane[0]").text
+
+    def window_caption(self, session):
+        return session.ActiveWindow.Text
+
+    def connect(self, environment, client=None, user=None, password=None, lang=None, force=True):
         con = SAP.app().OpenConnection(environment, True)
         session = con.Children(0)
 
@@ -70,6 +76,14 @@ class SAP:
             session.findById("wnd[0]/usr/txtRSYST-LANGU").Text = lang
 
         session.findById("wnd[0]").sendVKey(0)
+
+        sbar = self.get_sbar_status(session)
+        w = self.window_caption(session)
+
+        if force == true and (w=="License Information for Multiple Logon" or w=="Informação de licença em logon múltiplo"):
+            session.FindById("wnd[1]/usr/radMULTI_LOGON_OPT1").select()
+            session.FindById("wnd[1]/tbar[0]/btn[0]").press()
+
         del session
         self._con = con
 
