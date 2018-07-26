@@ -31,27 +31,31 @@ def _task_executor(task):
 
 
 class SAP:
+
     def __init__(self, max_sessions=16):
         self._con = None
         self._tasks = []
         self.max_sessions = max_sessions
         self.session = lambda i=0: self._con.Children(i)
+        self._connected = False
 
     @staticmethod
     def app():
+        """Open SAPGui"""
         wmi_obj = WMI()
 
-        def is_sap_process_exist():
-            return len(wmi_obj.Win32_Process(name='saplgpad.exe')) > 0
+        sap_exists = len(wmi_obj.Win32_Process(name='saplgpad.exe')) > 0
 
-        check_count = 0
-        while not is_sap_process_exist() and check_count < 30:
-            if check_count == 0:
-                Popen(['C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplgpad.exe'])
-            sleep(1)
-            check_count = check_count + 1
+        if not sap_exists:
+            Popen(['C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplgpad.exe'])
 
-        return GetObject("SAPGUI").GetScriptingEngine
+        while True:
+            try:
+                return GetObject("SAPGUI").GetScriptingEngine
+            except:
+                sleep(1)
+                pass
+
 
     def get_sbar_status(self, session):
         return session.findById("wnd[0]/sbar/pane[0]").text
@@ -59,7 +63,19 @@ class SAP:
     def window_caption(self, session):
         return session.ActiveWindow.Text
 
-    def connect(self, environment, client=None, user=None, password=None, lang=None, force=True):
+    def test_connection(self, session):
+        """SAP connection test"""
+        try:
+            session.findById("wnd[0]/tbar[0]/okcd").text = "/n"
+            session.findById("wnd[0]").sendVKey(0)
+            session.findById("wnd[0]/usr/btnSTARTBUTTON").press()
+            return True
+        except:
+            return False
+            raise ValueError('SAP was not connected.')
+
+
+    def connect(self, environment, client=None, user=None, password=None, lang=None, force=False):
         con = SAP.app().OpenConnection(environment, True)
         session = con.Children(0)
 
@@ -77,15 +93,44 @@ class SAP:
 
         session.findById("wnd[0]").sendVKey(0)
 
-        sbar = self.get_sbar_status(session)
-        w = self.window_caption(session)
+        #Eventual tela de mudanca de senha
+        change_pwd = False
+        try:
+            session.findById("wnd[1]/usr/pwdRSYST-NCODE").text = ''
+            session.findById("wnd[1]/usr/pwdRSYST-NCOD2").text = ''
+            change_pwd = True
+        except:
+            pass
 
-        if force == true and (w=="License Information for Multiple Logon" or w=="Informação de licença em logon múltiplo"):
-            session.FindById("wnd[1]/usr/radMULTI_LOGON_OPT1").select()
-            session.FindById("wnd[1]/tbar[0]/btn[0]").press()
+        if change_pwd:
+            raise ValueError('Please, set a new Password')
+
+        # Derruba conexão SAP
+        if force:
+            try:
+                session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").select()
+                session.findById("wnd[1]/tbar[0]/btn[0]").press()
+            except:
+                pass
+        else:
+            try:
+                session.findById("wnd[1]/usr/radMULTI_LOGON_OPT1").select()
+                session.findById("wnd[1]").sendVKey(12)
+                return False
+            except:
+                pass
+
+        # Teste da Conexao
+        if self.test_connection(session):
+            self._connected = True
 
         del session
         self._con = con
+        return self._connected
+
+    @property
+    def connected(self):
+        return self._connected
 
     @staticmethod
     def session():
@@ -163,7 +208,7 @@ class SAP:
         return response
 
     @staticmethod
-    def append_multi_selection(data, session):
+    def append_multi_selection(data):
         if type(data) is not str:
             data = "\r".join([str(d) for d in data])
 
