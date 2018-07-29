@@ -5,26 +5,25 @@ from tempfile import gettempdir
 
 
 class Session:
-	def __init__(self, session):
-		self._session = session
+    def __init__(self, session):
+        self._session = session
 
-	def __getattr__(self, attr):
-		attr = getattr(self._session, attr)
-		
-		if not ismethod(attr):
-			return attr	
+    def __getattr__(self, attr):
+        attr = getattr(self._session, attr)
+        if ismethod(attr):
+            def wrapper(*args, **kw):
+                return attr(*args, **kw)
 
-		def wrapper(*args, **kw):
-            return attr(*args, **kw)
+            return wrapper
 
-        return wrapper
+        return attr
 
     def append_multi_selection(self, data):
         if type(data) is not str:
             data = "\r".join([str(d) for d in data])
-        
+        folder = gettempdir().rstrip(';')
         file_name = "temp_append_{}_{}.txt".format(uuid4().hex, str(getpid()))
-        file_address = path.join(gettempdir(), file_name)
+        file_address = path.join(folder, file_name)
         with open(file_address, 'w+') as f:
             f.write(data)
         del f
@@ -37,8 +36,8 @@ class Session:
         session.findById("wnd[1]").sendVKey(8)
         remove(file_address)
 
-	def get_sbar_status(self):
-   		return self._session.findById("wnd[0]/sbar/pane[0]").text
+    def get_sbar_status(self):
+        return self._session.findById("wnd[0]/sbar/pane[0]").text
 
     def window_caption(self):
         return self._session.ActiveWindow.Text
@@ -46,7 +45,7 @@ class Session:
     def is_connected(self):
         """SAP connection test"""
         try:
-        	session = self._session
+            session = self._session
             session.findById("wnd[0]/tbar[0]/okcd").text = "/n"
             session.findById("wnd[0]").sendVKey(0)
             session.findById("wnd[0]/usr/btnSTARTBUTTON").press()

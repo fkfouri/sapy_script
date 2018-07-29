@@ -46,6 +46,7 @@ class SAP:
         sap_exists = len(wmi_obj.Win32_Process(name='saplgpad.exe')) > 0
 
         if not sap_exists:
+
             Popen(['C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplgpad.exe'])
 
         while True:
@@ -73,7 +74,7 @@ class SAP:
 
         session.findById("wnd[0]").sendVKey(0)
 
-        #Eventual tela de mudanca de senha
+        # Eventual tela de mudanca de senha
         change_pwd = False
         try:
             session.findById("wnd[1]/usr/pwdRSYST-NCODE").text = ''
@@ -101,12 +102,10 @@ class SAP:
                 pass
 
         # Teste da Conexao
-        connected = session.is_connected()
-
         if session.is_connected():
             self._con = con
             return True
-        
+
         self._con = None
         return False
 
@@ -188,7 +187,6 @@ class SAP:
         response = self.execute_tasks(resize_sessions=resize_sessions)
         self.clear_tasks()
         return response
-
 
     @staticmethod
     def multi_arguments(func):
