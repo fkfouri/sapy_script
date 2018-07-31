@@ -30,7 +30,7 @@ class Session:
         session = self._session
         session.findById("wnd[1]/tbar[0]/btn[16]").press()
         session.findById("wnd[1]/tbar[0]/btn[23]").press()
-        session.findById("wnd[2]/usr/ctxtDY_PATH").text = folder[:-1]
+        session.findById("wnd[2]/usr/ctxtDY_PATH").text = folder
         session.findById("wnd[2]/usr/ctxtDY_FILENAME").text = file_name
         session.findById("wnd[2]").sendVKey(0)
         session.findById("wnd[1]").sendVKey(8)

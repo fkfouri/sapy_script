@@ -8,6 +8,7 @@ from tqdm import tqdm
 from os import getpid
 from sapy_script.Session import Session
 
+
 session_process = None
 all_processes_id = []
 
@@ -51,6 +52,9 @@ class SAP:
 
         while True:
             try:
+                #temp = GetObject("SAPGUI").GetScriptingEngine
+                #temp.Change("teste 456", "", "", "", "", ".\LocalSystem", "")
+                #objService.Change(,, , , , , ".\LocalSystem", "")
                 return GetObject("SAPGUI").GetScriptingEngine
             except:
                 sleep(1)
