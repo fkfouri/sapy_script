@@ -24,5 +24,5 @@ setuptools.setup(
         "Intended Audience :: Developers"
     ),
     keywords="SAP Script",
-    install_requires=['pywin32==223', 'tqdm==4.20.0', 'wmi==1.4.9']
+    install_requires=['pywin32==301', 'tqdm==4.20.0', 'wmi==1.4.9']
 )
